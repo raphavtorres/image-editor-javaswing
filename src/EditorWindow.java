@@ -14,18 +14,22 @@ public class EditorWindow extends JFrame implements ActionListener {
     JLabel labelTxt;
     JButton changeColorBtn;
     JTextField inputText;
+    JButton downloadImgBtn;
+    JButton updateTextBtn;
 
 
     public void ChooseImg() {
         JFileChooser imgChooser = new JFileChooser();
-
         imgChooser.setCurrentDirectory(new File("user.dir"));
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("All Pic", "png", "jpg", "jpeg", "gif");
 
+        // Creating filter for img chooser
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("All Pic", "png", "jpg", "jpeg", "gif");
         imgChooser.addChoosableFileFilter(filter);
 
+        // shows the choose screen, passing null to indicate that the component has no parent elem (center screen)
         int response = imgChooser.showSaveDialog(null);
 
+        // if user chose a file
         if (response == JFileChooser.APPROVE_OPTION) {
             String path = imgChooser.getSelectedFile().getAbsolutePath();
             ImageIcon img = new ImageIcon(new ImageIcon(path).getImage().getScaledInstance(600, 500, Image.SCALE_DEFAULT));
@@ -35,7 +39,7 @@ public class EditorWindow extends JFrame implements ActionListener {
 
     public void ChangeTextColor(JLabel labelTxt) {
         JColorChooser colorChooser = new JColorChooser();
-        Color color = JColorChooser.showDialog(null, "Pick Color", Color.black);
+        Color color = JColorChooser.showDialog(null, "Change Text Color", Color.black);
         labelTxt.setForeground(color);
     }
 
@@ -44,25 +48,27 @@ public class EditorWindow extends JFrame implements ActionListener {
             // Image saved in buffer (can access each pixel individually)
             BufferedImage bufferedImg = new BufferedImage(600, 500, BufferedImage.TYPE_INT_RGB);
 
-            Graphics2D g2d = bufferedImg.createGraphics();
-            backgroundImgLb.paint(g2d);
+            // rendering img to g2d
+            Graphics2D imgGraphic = bufferedImg.createGraphics();
+            backgroundImgLb.paint(imgGraphic);
 
             // Render the text onto the image
-            g2d.setFont(labelTxt.getFont());
-            g2d.setColor(labelTxt.getForeground());
-            g2d.drawString(labelTxt.getText(), labelTxt.getX(), labelTxt.getY() + labelTxt.getHeight());
+            imgGraphic.setFont(labelTxt.getFont());
+            imgGraphic.setColor(labelTxt.getForeground());
+            imgGraphic.drawString(labelTxt.getText(), labelTxt.getX(), labelTxt.getY() + labelTxt.getHeight());
 
-            g2d.dispose();
+            // free memory
+            imgGraphic.dispose();
 
             // Create a file chooser to specify where to save the image
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setCurrentDirectory(new File("user.dir"));
-            fileChooser.setDialogTitle("Save Image");
+            fileChooser.setDialogTitle("Download Image");
 
             FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG Images", "png");
             fileChooser.setFileFilter(filter);
 
-            // Display the file chooser dialog
+            // Display the file chooser
             int userSelection = fileChooser.showSaveDialog(null);
 
             if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -127,22 +133,24 @@ public class EditorWindow extends JFrame implements ActionListener {
         changeColorBtn.addActionListener(this);
 
         // Create and add a button for downloading the image
-        JButton downloadImgBtn = new JButton("Download image");
-        downloadImgBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                DownloadImage();
-            }
-        });
+        downloadImgBtn = new JButton("Download image");
+        downloadImgBtn.addActionListener(this);
+//        downloadImgBtn.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                DownloadImage();
+//            }
+//        });
 
         inputText = new JTextField(20); // Create a text field with 20 columns
-        JButton updateTextBtn = new JButton("Update Label");
-        updateTextBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                labelTxt.setText(inputText.getText()); // Update label text
-            }
-        });
+        updateTextBtn = new JButton("Update Label");
+        updateTextBtn.addActionListener(this);
+//        updateTextBtn.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                labelTxt.setText(inputText.getText()); // Update label text
+//            }
+//        });
         this.add(downloadImgBtn);
 
         this.add(selectImgBtn);
@@ -161,8 +169,16 @@ public class EditorWindow extends JFrame implements ActionListener {
             ChooseImg();
         }
 
-        if (e.getSource() == changeColorBtn) {
+        else if (e.getSource() == changeColorBtn) {
             ChangeTextColor(labelTxt);
+        }
+
+        else if (e.getSource() == downloadImgBtn) {
+            DownloadImage();
+        }
+
+        else if (e.getSource() == updateTextBtn) {
+            labelTxt.setText(inputText.getText());
         }
     }
 }
